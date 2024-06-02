@@ -5,6 +5,7 @@ Hypixel Skyblock Mods Installer is a Go program designed to simplify the process
 ## <a id="features"></a>✨・Features
 ```
 - Easily download mods with a single click. (23 mods for now)
+- Download any mods you want
 - Automatically determine the Minecraft mods folder path.
 - Intuitive user interface for effortless mod management.
 - Even more coming up...
