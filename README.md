@@ -10,6 +10,11 @@ Hypixel Skyblock Mods Installer is a Go program designed to simplify the process
 - Even more coming up...
 ```
 
+## <a id="Program Picture"></a>🖥️・Program Picture
+
+![image](https://github.com/AdvancedSkyblock/Hypixel-Skyblock-Mods-Installer/assets/171434297/79569087-272b-4c79-81f7-e5db8f30ff91)
+
+
 ## If you prefer not to build the program from source
 you can download the pre-built binary for your operating system from the [releases page](https://github.com/AdvancedSkyblock/Hypixel-Skyblock-Mods-Installer/releases/). Simply download the appropriate binary for your platform and run it to start using Hypixel Skyblock Mods Installer
 
