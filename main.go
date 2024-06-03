@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-
 	"os"
 	"path/filepath"
 	"strconv"
@@ -29,6 +28,7 @@ type Mod struct {
 	URL    string `json:"url"`
 	Tags   string `json:"tags"`
 	GITHUB string `json:"github_url"`
+	Beta   string `json:"beta_url"`
 }
 
 func loadMods(filename string) ([]Mod, error) {
@@ -60,7 +60,7 @@ type Asset struct {
 	DownloadURL string `json:"browser_download_url"`
 }
 
-func downloadFile(urls, name, outputPath string, label *widget.Label, w fyne.Window) {
+func downloadFile(urls, outputName, outputPath string, label *widget.Label, w fyne.Window) {
 	if strings.Contains(urls, "odinclient") {
 		dialog.ShowError(fmt.Errorf("error downloading file | Cheat Version of Odin"), w)
 		return
@@ -90,9 +90,16 @@ func downloadFile(urls, name, outputPath string, label *widget.Label, w fyne.Win
 		return
 	}
 
-	fileName := name + ".jar"
+	filePath := filepath.Join(outputPath, outputName+".jar")
 
-	out, err := os.Create(filepath.Join(outputPath, fileName))
+	if _, err := os.Stat(filePath); err == nil {
+		if err := os.Remove(filePath); err != nil {
+			dialog.ShowError(fmt.Errorf("error deleting existing file: %w", err), w)
+			return
+		}
+	}
+
+	out, err := os.Create(filePath)
 	if err != nil {
 		dialog.ShowError(fmt.Errorf("error creating file: %w", err), w)
 		return
@@ -105,8 +112,9 @@ func downloadFile(urls, name, outputPath string, label *widget.Label, w fyne.Win
 		return
 	}
 
-	label.SetText(fmt.Sprintf("%s (Successfully downloaded)", name))
+	label.SetText(fmt.Sprintf("%s (Successfully downloaded)", outputName))
 }
+
 func searchMods(searchText string, selectedTags []string, mods []Mod) []Mod {
 	if searchText == "" && len(selectedTags) == 0 {
 		return mods
@@ -143,6 +151,7 @@ func getLatestRelease(repoURL string) (*Release, error) {
 	owner := parts[len(parts)-2]
 	repo := parts[len(parts)-1]
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -160,7 +169,36 @@ func getLatestRelease(repoURL string) (*Release, error) {
 
 	return &release, nil
 }
+func getLatestBetaRelease(repoURL string) (*Asset, error) {
+	parts := strings.Split(repoURL, "/")
+	owner := parts[len(parts)-2]
+	repo := parts[len(parts)-1]
+	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases", owner, repo)
+	resp, err := http.Get(apiURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to fetch releases: %s", resp.Status)
+	}
+
+	var releases []Release
+	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
+		return nil, err
+	}
+
+	for _, release := range releases {
+		for _, asset := range release.Assets {
+			assetName := strings.ToLower(asset.Name)
+			if strings.Contains(assetName, "beta") || strings.Contains(assetName, "pre") || strings.Contains(assetName, "prerelease") {
+				return &asset, nil
+			}
+		}
+	}
+	return nil, fmt.Errorf("no beta release found")
+}
 func main() {
 
 	a := app.New()
@@ -215,7 +253,6 @@ func main() {
 	})
 
 	list := container.NewVBox()
-
 	updateList := func(mods []Mod) {
 		list.Objects = nil
 		for _, mod := range mods {
@@ -275,17 +312,48 @@ func main() {
 
 			downloadButton.Importance = widget.HighImportance
 
+			var downloadBetaButton *widget.Button
+			if mod.Beta != "" {
+				downloadBetaButton = widget.NewButton("Download Beta", func() {
+					if modPathEntry.Text == "" {
+						dialog.ShowError(fmt.Errorf("Mod path is empty"), w)
+						return
+					}
+
+					label.SetText(fmt.Sprintf("%s (Downloading Beta...)", mod.Name))
+
+					go func() {
+						asset, err := getLatestBetaRelease(mod.Beta)
+						if err != nil {
+							dialog.ShowError(fmt.Errorf("error fetching latest beta release: %w", err), w)
+							return
+						}
+						downloadURL := asset.DownloadURL
+						if downloadURL == "" {
+							dialog.ShowError(fmt.Errorf("no beta .jar file found in the latest release"), w)
+							return
+						}
+						downloadFile(downloadURL, mod.Name+"-beta", modPathEntry.Text, label, w)
+					}()
+				})
+				downloadBetaButton.Importance = widget.HighImportance
+			}
+
 			hbox := container.NewHBox(
 				label,
 				layout.NewSpacer(),
 				githubButton,
 				downloadButton,
 			)
+
+			if downloadBetaButton != nil {
+				hbox.Add(downloadBetaButton)
+			}
+
 			list.Add(hbox)
 		}
 		list.Refresh()
 	}
-
 	updateList(mods)
 
 	scroll := container.NewScroll(list)
