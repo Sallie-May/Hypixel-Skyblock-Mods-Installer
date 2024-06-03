@@ -19,6 +19,17 @@ All of the mods download URLs are from the official sources
 - Even more coming up...
 ```
 
+_____
+## Update List
+<details>
+  <summary>Click on here to reveal all updates</summary>
+  
+```plaintext
+V1.01 Added CoflNet Skyblock Mod
+V1 Added everything else
+```
+</details>
+
 ## <a id="Program Picture"></a>🖥️・Program Picture
 
 ![image](https://github.com/AdvancedSkyblock/Hypixel-Skyblock-Mods-Installer/assets/171434297/79569087-272b-4c79-81f7-e5db8f30ff91)
