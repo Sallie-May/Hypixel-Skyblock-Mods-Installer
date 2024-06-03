@@ -30,6 +30,8 @@ V1 Added everything else
 ```
 </details>
 
+[VirusTotal](https://www.virustotal.com/gui/file/5e18ee95fd4070968661043fa1de88b60222d126b91852712479ea7f659eed05)
+
 ## <a id="Program Picture"></a>🖥️・Program Picture
 
 ![image](https://github.com/AdvancedSkyblock/Hypixel-Skyblock-Mods-Installer/assets/171434297/79569087-272b-4c79-81f7-e5db8f30ff91)
