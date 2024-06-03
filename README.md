@@ -25,6 +25,7 @@ _____
   <summary>Click on here to reveal all updates</summary>
   
 ```plaintext
+V1.1 Fixed Optifine direct download and added download beta button
 V1.01 Added CoflNet Skyblock Mod
 V1 Added everything else
 ```
