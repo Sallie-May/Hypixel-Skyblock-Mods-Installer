@@ -357,7 +357,7 @@ func main() {
 	updateList(mods)
 
 	scroll := container.NewScroll(list)
-	scroll.SetMinSize(fyne.NewSize(300, 200))
+	scroll.SetMinSize(fyne.NewSize(300, 300))
 	var pathLabel *widget.Label
 	x := 0
 	for range mods {
@@ -365,7 +365,7 @@ func main() {
 	}
 
 	contributeButton := widget.NewButton("Contribute", func() {
-		u, err := url.Parse("https://github.com/AdvancedSkyblock/Hypixel-Skyblock-Mods-Installer/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=Contribution")
+		u, err := url.Parse("https://github.com/Sallie-May/Hypixel-Skyblock-Mods-Installer/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=Contribution")
 		if err != nil {
 			return
 		}
@@ -373,7 +373,7 @@ func main() {
 		a.OpenURL(u)
 	})
 	GithubRepo := widget.NewButton("Github Repository", func() {
-		u, err := url.Parse("https://github.com/AdvancedSkyblock/Hypixel-Skyblock-Mods-Installer/")
+		u, err := url.Parse("https://github.com/Sallie-May/Hypixel-Skyblock-Mods-Installer/")
 		if err != nil {
 			return
 		}
@@ -382,7 +382,7 @@ func main() {
 	})
 
 	issuesButton := widget.NewButton("Open a new issue", func() {
-		u, err := url.Parse("https://github.com/AdvancedSkyblock/Hypixel-Skyblock-Mods-Installer/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=Bug Report")
+		u, err := url.Parse("https://github.com/Sallie-May/Hypixel-Skyblock-Mods-Installer/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=Bug Report")
 		if err != nil {
 			return
 		}
@@ -466,7 +466,7 @@ func main() {
 	searchEntry.SetText("")
 	searchEntry.Show()
 	modPathEntry.Show()
-	w.Resize(fyne.NewSize(1280, 720))
+	w.Resize(fyne.NewSize(1280, 320))
 
 	w.ShowAndRun()
 }
