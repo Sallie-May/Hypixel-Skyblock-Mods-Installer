@@ -84,3 +84,5 @@ Contributions are welcome! If you encounter any issues or have suggestions for i
 ## <a id="Terms"></a>💼・Terms
 
 This project is licensed under the [Apache-2.0 license](LICENSE).
+
+[![Star History](https://api.star-history.com/svg?repos=Sallie-May/Hypixel-Skyblock-Mods-Installer&type=Date)](https://star-history.com/#Sallie-May/Hypixel-Skyblock-Mods-Installer&Date)
