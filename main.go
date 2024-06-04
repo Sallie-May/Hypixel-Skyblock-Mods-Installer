@@ -21,6 +21,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/agnivade/levenshtein"
 )
 
 type Mod struct {
@@ -60,7 +61,20 @@ type Asset struct {
 	DownloadURL string `json:"browser_download_url"`
 }
 
-func downloadFile(urls, outputName, outputPath string, label *widget.Label, w fyne.Window) {
+func calculateSimilarity(version1, version2 string) float64 {
+	distance := levenshtein.ComputeDistance(version1, version2)
+
+	maxLength := len(version1)
+	if len(version2) > maxLength {
+		maxLength = len(version2)
+	}
+	maxDistance := float64(maxLength)
+
+	similarity := 1.0 - (float64(distance) / maxDistance)
+	return similarity
+}
+
+func downloadFile(urls, outputPath, baseName string, label *widget.Label, w fyne.Window) {
 	if strings.Contains(urls, "odinclient") {
 		dialog.ShowError(fmt.Errorf("error downloading file | Cheat Version of Odin"), w)
 		return
@@ -90,29 +104,51 @@ func downloadFile(urls, outputName, outputPath string, label *widget.Label, w fy
 		return
 	}
 
-	filePath := filepath.Join(outputPath, outputName+".jar")
+	parsedURL, err := url.Parse(urls)
+	if err != nil {
+		dialog.ShowError(fmt.Errorf("error parsing URL: %w", err), w)
+		return
+	}
+	fileName := filepath.Base(parsedURL.Path)
 
-	if _, err := os.Stat(filePath); err == nil {
-		if err := os.Remove(filePath); err != nil {
-			dialog.ShowError(fmt.Errorf("error deleting existing file: %w", err), w)
-			return
+	similarFileFound := false
+	const threshold = 0.8 
+
+	existingFiles, err := ioutil.ReadDir(outputPath)
+	if err == nil {
+		for _, fileInfo := range existingFiles {
+			existingFileName := fileInfo.Name()
+
+			similarity := calculateSimilarity(fileName, existingFileName)
+			if similarity >= threshold {
+				existingFilePath := filepath.Join(outputPath, existingFileName)
+				if err := os.Remove(existingFilePath); err != nil {
+					dialog.ShowError(fmt.Errorf("error deleting existing file: %w", err), w)
+					return
+				}
+
+				similarFileFound = true
+			}
 		}
 	}
 
-	out, err := os.Create(filePath)
-	if err != nil {
-		dialog.ShowError(fmt.Errorf("error creating file: %w", err), w)
-		return
-	}
-	defer out.Close()
+	if similarFileFound {
+		filePath := filepath.Join(outputPath, fileName)
+		out, err := os.Create(filePath)
+		if err != nil {
+			dialog.ShowError(fmt.Errorf("error creating file: %w", err), w)
+			return
+		}
+		defer out.Close()
 
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		dialog.ShowError(fmt.Errorf("error saving file: %w", err), w)
-		return
-	}
+		_, err = io.Copy(out, resp.Body)
+		if err != nil {
+			dialog.ShowError(fmt.Errorf("error saving file: %w", err), w)
+			return
+		}
 
-	label.SetText(fmt.Sprintf("%s (Successfully downloaded)", outputName))
+		label.SetText(fmt.Sprintf("%s (Successfully downloaded)", fileName))
+	}
 }
 
 func searchMods(searchText string, selectedTags []string, mods []Mod) []Mod {
@@ -306,7 +342,7 @@ func main() {
 				label.SetText(fmt.Sprintf("%s (Downloading...)", mod.Name))
 
 				go func() {
-					downloadFile(downloadURL, mod.Name, modPathEntry.Text, label, w)
+					downloadFile(downloadURL, modPathEntry.Text, mod.Name, label, w)
 				}()
 			})
 
@@ -333,7 +369,7 @@ func main() {
 							dialog.ShowError(fmt.Errorf("no beta .jar file found in the latest release"), w)
 							return
 						}
-						downloadFile(downloadURL, mod.Name+"-beta", modPathEntry.Text, label, w)
+						downloadFile(downloadURL, modPathEntry.Text, mod.Name, label, w)
 					}()
 				})
 				downloadBetaButton.Importance = widget.HighImportance
