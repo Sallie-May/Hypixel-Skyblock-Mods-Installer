@@ -6,7 +6,7 @@ Hypixel Skyblock Mods Installer is a Go program designed to simplify the process
 
 All of the mods download URLs are from the official sources
 - Basing itself out of official website (essential)
-- From the GitHub Page
+- From the GitHub Page 
 - Or from Modrinth
 - And you can still check them inside the `mods.json` file and requests a url changed or deletion
   
